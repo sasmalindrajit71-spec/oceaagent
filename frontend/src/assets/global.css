@@ -1,0 +1,129 @@
+/* ============================================
+   OCEAN — Global B&W Design System
+   Place at: frontend/src/assets/global.css
+============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --black:        #000000;
+  --white:        #ffffff;
+  --glass:        rgba(255,255,255,0.03);
+  --glass-hover:  rgba(255,255,255,0.06);
+  --border:       rgba(255,255,255,0.08);
+  --border-mid:   rgba(255,255,255,0.14);
+  --border-hi:    rgba(255,255,255,0.25);
+  --text-hi:      rgba(255,255,255,0.90);
+  --text-mid:     rgba(255,255,255,0.45);
+  --text-lo:      rgba(255,255,255,0.20);
+  --text-xlo:     rgba(255,255,255,0.10);
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'Space Mono', 'Courier New', monospace;
+  --nav-h:        54px;
+  --radius:       2px;
+  --transition:   all 0.2s ease;
+}
+
+html, body {
+  background: var(--black);
+  color: var(--text-hi);
+  font-family: var(--font-display);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  /* NO cursor:none — normal cursor */
+}
+
+/* Scrollbar */
+::-webkit-scrollbar        { width: 3px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* Buttons */
+.btn-primary {
+  padding: 12px 28px;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-block;
+}
+.btn-primary:hover { background: rgba(255,255,255,0.86); }
+
+.btn-secondary {
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-block;
+}
+.btn-secondary:hover {
+  border-color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.04);
+}
+
+/* Form elements */
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 1.4rem;
+  cursor: text;
+}
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus  { border-color: rgba(255,255,255,0.32); background: rgba(255,255,255,0.04); }
+.form-textarea      { min-height: 90px; resize: vertical; }
+.form-select        { appearance: none; cursor: pointer; }
+.form-select option { background: #111; }
+
+/* Toggle switch */
+.toggle {
+  width: 40px; height: 21px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.22s;
+  flex-shrink: 0;
+}
+.toggle.on { background: rgba(255,255,255,0.86); border-color: rgba(255,255,255,0.86); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: all 0.22s;
+}
+.toggle.on::after { left: 21px; background: var(--black); }

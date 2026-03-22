@@ -1,0 +1,66 @@
+# ocean.config.yaml — copy to ocean.config.yaml and fill in your keys
+
+providers:
+  openrouter:
+    api_key: ""
+    enabled: true
+    models:
+      deep_agent: "deepseek/deepseek-chat-v3-0324:free"
+      shallow_agent: "moonshotai/moonlight-16a-instruct-preview:free"
+      evaluator: "qwen/qwq-32b:free"
+      graph_rag: "deepseek/deepseek-chat-v3-0324:free"
+      report_engine: "qwen/qwq-32b:free"
+
+  groq:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: "llama-4-scout-17b-16e-instruct"
+      shallow_agent: "gemma3-27b-it"
+      evaluator: "llama-4-maverick-17b-128e-instruct"
+      graph_rag: "llama-4-scout-17b-16e-instruct"
+      report_engine: "llama-4-maverick-17b-128e-instruct"
+
+  together:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+      shallow_agent: "google/gemma-3-27b-it"
+      evaluator: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+      graph_rag: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+      report_engine: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+
+  mistral:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: "mistral-large-latest"
+      shallow_agent: "mistral-small-latest"
+      evaluator: "mistral-large-latest"
+      graph_rag: "mistral-large-latest"
+      report_engine: "mistral-large-latest"
+
+  custom:
+    base_url: ""
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: ""
+      shallow_agent: ""
+      evaluator: ""
+      graph_rag: ""
+      report_engine: ""
+
+simulation:
+  default_deep_agents: 50
+  default_shallow_agents: 500
+  max_deep_agents: 500
+  max_shallow_agents: 5000
+  default_ticks: 100
+  tick_delay_ms: 500
+
+memory:
+  decay_rate: 0.05
+  emotional_salience_multiplier: 2.0
+  max_memories_per_agent: 100
