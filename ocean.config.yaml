@@ -1,0 +1,67 @@
+# ocean.config.yaml
+# OCEAN Configuration — Groq only setup
+
+providers:
+  openrouter:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: ""
+      shallow_agent: ""
+      evaluator: ""
+      graph_rag: ""
+      report_engine: ""
+
+  groq:
+    api_key: ""
+    enabled: true
+    models:
+      deep_agent: "llama-3.3-70b-versatile"
+      shallow_agent: "llama-3.3-70b-versatile"
+      evaluator: "llama-3.3-70b-versatile"
+      graph_rag: "llama-3.3-70b-versatile"
+      report_engine: "llama-3.3-70b-versatile"
+
+  together:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: ""
+      shallow_agent: ""
+      evaluator: ""
+      graph_rag: ""
+      report_engine: ""
+
+  mistral:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: ""
+      shallow_agent: ""
+      evaluator: ""
+      graph_rag: ""
+      report_engine: ""
+
+  custom:
+    base_url: ""
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: ""
+      shallow_agent: ""
+      evaluator: ""
+      graph_rag: ""
+      report_engine: ""
+
+simulation:
+  default_deep_agents: 20
+  default_shallow_agents: 200
+  max_deep_agents: 500
+  max_shallow_agents: 5000
+  default_ticks: 30
+  tick_delay_ms: 500
+
+memory:
+  decay_rate: 0.05
+  emotional_salience_multiplier: 2.0
+  max_memories_per_agent: 100
