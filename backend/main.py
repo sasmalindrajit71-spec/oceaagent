@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from database import init_db, get_db
 from analytics import init_analytics, track_pageview, SessionLocal as ADB, PageView
-from admin import router as admin_router, Simulation, Agent, Interaction, Event
+from admin import router as admin_router, Simulation, Agent, Interaction
 from config import config, save_config, OceanConfig, ProvidersConfig, ProviderConfig, ModelSet
 from llm import router as llm_router, test_provider
 import ingestion.extractor as extractor
