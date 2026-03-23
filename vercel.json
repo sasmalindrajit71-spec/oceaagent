@@ -3,8 +3,14 @@
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://YOUR_RAILWAY_URL/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/(.*)",
+      "destination": "https://oceaagent-production.up.railway.app/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
@@ -15,6 +21,5 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
-  ],
-  "domains": ["oceaagent.xyz", "www.oceaagent.xyz"]
+  ]
 }
