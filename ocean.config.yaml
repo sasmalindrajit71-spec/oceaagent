@@ -61,6 +61,17 @@ simulation:
   default_ticks: 30
   tick_delay_ms: 500
 
+
+nvidia:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: "meta/llama-3.3-70b-instruct"
+      shallow_agent: "meta/llama-3.1-8b-instruct"
+      evaluator: "nvidia/llama-3.3-nemotron-super-49b-v1"
+      graph_rag: "meta/llama-3.3-70b-instruct"
+      report_engine: "nvidia/nemotron-3-super-120b-a12b"
+
 memory:
   decay_rate: 0.05
   emotional_salience_multiplier: 2.0
