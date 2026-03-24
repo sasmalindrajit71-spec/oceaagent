@@ -2,8 +2,5 @@
   "scripts": {
     "install": "npm --prefix frontend install",
     "build": "npm --prefix frontend run build"
-  },
-  "dependencies": {
-    "three": "^0.183.2"
   }
 }
