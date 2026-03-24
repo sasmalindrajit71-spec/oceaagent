@@ -133,7 +133,6 @@ async def _run_interaction(
             system=system_a,
             max_tokens=200,
             temperature=0.85,
-            preferred_provider=agent_a.provider,
         )
 
         emotion_delta_a = _extract_emotion_delta(opening)
@@ -164,7 +163,6 @@ async def _run_interaction(
             system=system_b,
             max_tokens=200,
             temperature=0.85,
-            preferred_provider=agent_b.provider,
         )
 
         emotion_delta_b = _extract_emotion_delta(response)
@@ -223,7 +221,6 @@ async def _run_interaction(
 
 def _statistical_interaction(agent_a, agent_b, simulation_id, tick, topic, db) -> dict:
     """Fast statistical interaction for shallow-shallow pairs."""
-    # Belief contagion based on similarity
     lean_diff = agent_b.political_lean - agent_a.political_lean
     contagion = lean_diff * 0.05 * agent_b.influence_score
 
@@ -262,7 +259,6 @@ def _select_interaction_pairs(agents, social_graph, tick) -> list[tuple]:
     pairs = []
     deep_agents = [a for a in agents if a.tier == "deep"]
 
-    # Deep agents always interact
     random.shuffle(deep_agents)
     for i in range(0, len(deep_agents) - 1, 2):
         neighbours = get_agent_neighbours(social_graph, deep_agents[i].id)
@@ -270,7 +266,6 @@ def _select_interaction_pairs(agents, social_graph, tick) -> list[tuple]:
             partner_id = random.choice(neighbours)
             pairs.append((deep_agents[i].id, partner_id))
 
-    # Shallow agents — sample a subset
     shallow_agents = [a for a in agents if a.tier == "shallow"]
     sample_size = min(len(shallow_agents) // 4, 20)
     sampled = random.sample(shallow_agents, sample_size) if shallow_agents else []

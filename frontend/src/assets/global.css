@@ -19,10 +19,10 @@
   --border:       rgba(255,255,255,0.08);
   --border-mid:   rgba(255,255,255,0.14);
   --border-hi:    rgba(255,255,255,0.25);
-  --text-hi:      rgba(255,255,255,0.90);
-  --text-mid:     rgba(255,255,255,0.45);
-  --text-lo:      rgba(255,255,255,0.20);
-  --text-xlo:     rgba(255,255,255,0.10);
+  --text-hi:      rgba(255,255,255,0.95);   /* was 0.90 — boosted */
+  --text-mid:     rgba(255,255,255,0.65);   /* was 0.45 — boosted */
+  --text-lo:      rgba(255,255,255,0.40);   /* was 0.20 — boosted */
+  --text-xlo:     rgba(255,255,255,0.20);   /* was 0.10 — boosted */
   --font-display: 'Syne', sans-serif;
   --font-mono:    'Space Mono', 'Courier New', monospace;
   --nav-h:        54px;
@@ -34,65 +34,79 @@ html, body {
   background: var(--black);
   color: var(--text-hi);
   font-family: var(--font-display);
+  font-size: 16px;              /* base size up from default 14px */
+  line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  /* NO cursor:none — normal cursor */
 }
 
-/* Scrollbar */
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar        { width: 3px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.12); border-radius: 2px; }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.18); border-radius: 2px; }
 
-/* Buttons */
+/* ── Typography scale ──────────────────────────────────────────────────── */
+h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800; color: var(--white); line-height: 1.15; }
+h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 700; color: var(--white); line-height: 1.25; }
+h3 { font-size: clamp(1rem, 2.5vw, 1.3rem);  font-weight: 700; color: var(--white); }
+h4 { font-size: 1rem; font-weight: 700; color: var(--text-hi); }
+
+p  { font-size: 1rem; color: var(--text-mid); line-height: 1.7; }
+
+/* Monospace labels — used throughout settings, cards */
+.mono        { font-family: var(--font-mono); }
+.label-xs    { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-lo); }
+.label-sm    { font-family: var(--font-mono); font-size: 11px; color: var(--text-mid); }
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
 .btn-primary {
-  padding: 12px 28px;
+  padding: 13px 30px;
   background: var(--white);
   color: var(--black);
   border: none;
   border-radius: var(--radius);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   transition: background 0.2s;
   display: inline-block;
+  white-space: nowrap;
 }
-.btn-primary:hover { background: rgba(255,255,255,0.86); }
+.btn-primary:hover    { background: rgba(255,255,255,0.86); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-secondary {
-  padding: 12px 28px;
+  padding: 13px 30px;
   background: transparent;
   color: var(--white);
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.30);
   border-radius: var(--radius);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition);
   display: inline-block;
+  white-space: nowrap;
 }
-.btn-secondary:hover {
-  border-color: rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.04);
-}
+.btn-secondary:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); }
 
-/* Form elements */
+/* ── Form elements ──────────────────────────────────────────────────────── */
 .form-input,
 .form-textarea,
 .form-select {
   width: 100%;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-mid);  /* slightly more visible border */
   border-radius: var(--radius);
   color: var(--white);
   font-family: var(--font-mono);
-  font-size: 12px;
-  padding: 10px 14px;
+  font-size: 13px;                       /* up from 12px */
+  padding: 12px 16px;                    /* more breathing room */
   outline: none;
   transition: border-color 0.2s;
   margin-bottom: 1.4rem;
@@ -100,17 +114,17 @@ html, body {
 }
 .form-input:focus,
 .form-textarea:focus,
-.form-select:focus  { border-color: rgba(255,255,255,0.32); background: rgba(255,255,255,0.04); }
-.form-textarea      { min-height: 90px; resize: vertical; }
+.form-select:focus  { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.06); }
+.form-textarea      { min-height: 100px; resize: vertical; }
 .form-select        { appearance: none; cursor: pointer; }
 .form-select option { background: #111; }
 
-/* Toggle switch */
+/* ── Toggle switch ──────────────────────────────────────────────────────── */
 .toggle {
   width: 40px; height: 21px;
   border-radius: 11px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-mid);
+  background: rgba(255,255,255,0.05);
   cursor: pointer;
   position: relative;
   transition: all 0.22s;
@@ -123,7 +137,181 @@ html, body {
   top: 2px; left: 2px;
   width: 15px; height: 15px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.35);
   transition: all 0.22s;
 }
 .toggle.on::after { left: 21px; background: var(--black); }
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+.card:hover { border-color: var(--border-hi); }
+
+/* ── Settings page — provider groups ───────────────────────────────────── */
+.grp { border: 1px solid rgba(255,255,255,0.10); margin-bottom: 2px; transition: border-color 0.2s; }
+.grp-active { border-color: rgba(255,255,255,0.22); }
+.nvidia-grp.grp-active { border-color: rgba(118,185,0,0.35); }
+
+.grp-hdr { padding: 1.1rem 1.4rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.grp-hdr-left { display: flex; align-items: center; gap: 14px; }
+.grp-t { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.70); }
+.grp-s { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 3px; }
+
+.grp-body { padding: 1.4rem; border-top: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; gap: 14px; }
+
+/* Saved key display */
+.saved-key-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.10); border-radius: 2px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.saved-key-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+.saved-key-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.saved-key-val { font-family: var(--font-mono); font-size: 13px; color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 2px; }
+.saved-ok { font-family: var(--font-mono); font-size: 11px; color: rgba(118,185,0,0.85); }
+
+/* Key input row */
+.flabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.40); margin-bottom: 8px; display: block; }
+.key-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sinp { flex: 1; min-width: 180px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 2px; color: #fff; font-family: var(--font-mono); font-size: 13px; padding: 10px 14px; outline: none; transition: border-color 0.2s; }
+.sinp:focus { border-color: rgba(255,255,255,0.35); }
+.sinp.sm { flex: 0 0 70px; text-align: center; }
+.field-hint { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.30); }
+.field-hint a { color: rgba(255,255,255,0.60); }
+
+/* Buttons (settings) */
+.btn-xs { padding: 9px 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); border-radius: 2px; color: rgba(255,255,255,0.75); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.btn-xs:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+.btn-xs.primary { background: #fff; color: #000; border-color: #fff; }
+.btn-xs.primary:hover { background: rgba(255,255,255,0.88); }
+.btn-xs:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Messages */
+.msg-ok  { font-family: var(--font-mono); font-size: 11px; color: rgba(118,185,0,0.90); letter-spacing: 0.06em; }
+.msg-err { font-family: var(--font-mono); font-size: 11px; color: rgba(255,100,100,0.90); letter-spacing: 0.06em; }
+
+/* ── Provider logo badge ─────────────────────────────────────────────────── */
+.provider-logo { width: 40px; height: 40px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.nvidia-logo { background: rgba(118,185,0,0.10); border-color: rgba(118,185,0,0.35); color: #76b900; }
+
+/* ── Status badges ──────────────────────────────────────────────────────── */
+.status-badge { font-family: var(--font-mono); font-size: 10px; padding: 4px 12px; border-radius: 1px; border: 1px solid; white-space: nowrap; }
+.badge-on  { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.07); }
+.badge-off { color: rgba(255,255,255,0.30); border-color: rgba(255,255,255,0.08); background: transparent; }
+
+.recommended-pill { font-size: 9px; padding: 2px 7px; background: rgba(118,185,0,0.15); color: #76b900; border: 1px solid rgba(118,185,0,0.35); border-radius: 1px; margin-left: 8px; letter-spacing: 0.1em; }
+.fallback-pill    { font-size: 9px; padding: 2px 7px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.12); border-radius: 1px; margin-left: 8px; letter-spacing: 0.1em; }
+
+/* ── Model assignment grid ──────────────────────────────────────────────── */
+.model-assignment { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; padding: 16px; }
+.ma-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+.ma-grid  { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.ma-row   { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.ma-row:last-child { border-bottom: none; }
+.ma-role-name { font-size: 13px; font-weight: 700; color: #fff; }
+.ma-role-desc { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.30); margin-top: 3px; }
+.fsel-sm  { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 2px; color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 8px 12px; outline: none; min-width: 200px; appearance: none; cursor: pointer; }
+.fsel-sm option    { background: #111; }
+.fsel-sm optgroup  { background: #000; color: rgba(255,255,255,0.4); font-size: 10px; }
+.ma-tip   { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.30); line-height: 1.7; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 12px; }
+.ma-tip strong { color: rgba(255,255,255,0.55); font-weight: 400; }
+
+/* ── Priority list ──────────────────────────────────────────────────────── */
+.priority-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.priority-row:last-of-type { border-bottom: none; }
+.p-num  { font-family: var(--font-mono); font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.18); width: 22px; flex-shrink: 0; }
+.p-active .p-num  { color: rgba(255,255,255,0.75); }
+.p-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.45); flex: 1; }
+.p-active .p-name { color: #fff; }
+.p-status { font-family: var(--font-mono); font-size: 10px; }
+.p-on   { color: rgba(118,185,0,0.85); }
+.p-off  { color: rgba(255,255,255,0.25); }
+.priority-note { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.22); line-height: 1.8; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; }
+
+/* ── Simulation defaults ─────────────────────────────────────────────────── */
+.srow { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 16px; }
+.srow:last-child { border-bottom: none; padding-bottom: 0; }
+.sname { font-size: 13px; font-weight: 700; color: #fff; }
+.sdesc { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.30); margin-top: 2px; }
+
+/* ── Mobile responsiveness ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Settings page padding */
+  .page-bg  { padding: 1.5rem 1rem !important; }
+  .inner    { max-width: 100% !important; }
+
+  /* Provider header stacks on small screens */
+  .grp-hdr  { flex-direction: column; align-items: flex-start; }
+  .grp-body { padding: 1rem; }
+
+  /* Key input row stacks vertically */
+  .key-row  { flex-direction: column; align-items: stretch; }
+  .key-row .sinp   { min-width: 0; width: 100%; }
+  .key-row .btn-xs { width: 100%; text-align: center; }
+
+  /* Saved key row wraps */
+  .saved-key-row { flex-wrap: wrap; }
+
+  /* Model assignment: selector goes below label */
+  .ma-row { grid-template-columns: 1fr; gap: 8px; }
+  .fsel-sm { min-width: 0; width: 100%; }
+
+  /* Priority rows */
+  .priority-row { flex-wrap: wrap; gap: 8px; }
+
+  /* Sim defaults row stacks */
+  .srow { flex-direction: column; align-items: flex-start; }
+  .srow .sinp { width: 100%; }
+
+  /* General nav/sidebar hiding (if sidebar exists) */
+  .sidebar, .nav-sidebar {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    background: #0a0a0a;
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar.open { left: 0; }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 1rem !important;
+    width: 100% !important;
+  }
+
+  /* Stack any flex rows that would overflow */
+  .flex-row, .row {
+    flex-direction: column !important;
+    gap: 1rem;
+  }
+
+  /* Full-width buttons on mobile */
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Tables scroll horizontally */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Simulation panels stack */
+  .simulation-panels { flex-direction: column !important; gap: 1rem; }
+
+  /* Headings scale down */
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+}
+
+@media (max-width: 480px) {
+  .page-bg { padding: 1rem 0.75rem !important; }
+  .provider-logo { width: 32px; height: 32px; font-size: 10px; }
+  .grp-hdr { padding: 0.9rem 1rem; }
+  .grp-body { padding: 0.9rem 1rem; }
+}

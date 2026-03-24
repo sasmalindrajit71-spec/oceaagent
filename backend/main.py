@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database import init_db, get_db
+from database import init_db, get_db, SessionLocal, Event
 from analytics import init_analytics, track_pageview, SessionLocal as ADB, PageView
 from admin import router as admin_router, Simulation, Agent, Interaction
 from config import config, save_config, OceanConfig, ProvidersConfig, ProviderConfig, ModelSet
@@ -32,6 +32,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Mount routers ────────────────────────────────────────────────────────────
+app.include_router(admin_router, prefix="/api/admin", tags=["admin"])
 
 # Active WebSocket connections per simulation
 _ws_connections: dict[str, list[WebSocket]] = {}
@@ -116,7 +119,6 @@ def get_active_providers():
     return {"providers": llm_router.get_active_providers()}
 
 
-
 @app.post("/api/analytics/pageview")
 async def record_pageview(request: Request, body: dict = None):
     """Called by frontend on every page navigation."""
@@ -182,8 +184,6 @@ async def create_simulation(body: CreateSimulationRequest, db: Session = Depends
 async def _extract_and_prepare(sim_id: str, body: CreateSimulationRequest):
     """Background: extract knowledge graph and set status to validating."""
     db = SessionLocal()
-    from database import SessionLocal
-    db = SessionLocal()
     try:
         sim = db.query(Simulation).filter_by(id=sim_id).first()
 
@@ -239,7 +239,6 @@ async def create_simulation_from_file(
 
 
 async def _extract_from_file(sim_id: str, content: bytes, filename: str):
-    from database import SessionLocal
     db = SessionLocal()
     try:
         sim = db.query(Simulation).filter_by(id=sim_id).first()
@@ -289,7 +288,6 @@ async def generate_agents(sim_id: str, db: Session = Depends(get_db)):
 
 
 async def _generate_agents_task(sim_id: str):
-    from database import SessionLocal
     db = SessionLocal()
     try:
         sim = db.query(Simulation).filter_by(id=sim_id).first()
@@ -420,7 +418,6 @@ async def websocket_endpoint(websocket: WebSocket, sim_id: str):
 
     try:
         while True:
-            # Keep connection alive, client can send control messages
             data = await websocket.receive_text()
             msg = json.loads(data)
             if msg.get("type") == "ping":
@@ -455,7 +452,7 @@ def _sim_to_dict(s: Simulation) -> dict:
         "shallow_agent_count": s.shallow_agent_count,
         "knowledge_graph": {
             k: v for k, v in (s.knowledge_graph or {}).items()
-            if k != "social_graph"  # don't send full graph over REST
+            if k != "social_graph"
         },
         "has_report": bool(s.report),
         "created_at": s.created_at.isoformat() if s.created_at else None,
