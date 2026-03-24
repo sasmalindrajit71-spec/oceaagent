@@ -201,6 +201,53 @@
               <div class="stat"><span class="stat-val">{{ report.stats?.total_interactions }}</span><span class="dim">interactions</span></div>
               <div class="stat"><span class="stat-val">{{ report.stats?.avg_emotion_final?.toFixed(3) }}</span><span class="dim">avg emotion</span></div>
             </div>
+            <div class="report-section" v-if="predictionView">
+              <h4>Prediction Outlook</h4>
+              <div class="prediction-card">
+                <div class="pred-main">
+                  <div class="pred-pct">{{ predictionView.percent }}%</div>
+                  <div class="pred-outcome">{{ predictionView.outcome }}</div>
+                  <div class="pred-conf">Confidence {{ predictionView.confidencePercent }}%</div>
+                </div>
+                <div class="pred-viz">
+                  <div class="pred-ring" :style="predictionRingStyle"></div>
+                  <div class="pred-bars">
+                    <div class="pred-bar-row">
+                      <span class="pred-label">{{ predictionView.outcome }}</span>
+                      <div class="pred-bar-track">
+                        <div class="pred-bar-fill yes" :style="{ width: predictionView.percent + '%' }"></div>
+                      </div>
+                      <span class="pred-val">{{ predictionView.percent }}%</span>
+                    </div>
+                    <div class="pred-bar-row">
+                      <span class="pred-label">{{ predictionView.counterOutcome }}</span>
+                      <div class="pred-bar-track">
+                        <div class="pred-bar-fill no" :style="{ width: predictionView.counterPercent + '%' }"></div>
+                      </div>
+                      <span class="pred-val">{{ predictionView.counterPercent }}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="predictionView.evidence?.length" class="pred-evidence">
+                  <div v-for="(ev, i) in predictionView.evidence" :key="i" class="pred-evidence-item">{{ ev }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="report-section" v-if="clusterBars.length">
+              <h4>Cluster Mood Graph</h4>
+              <div class="cluster-graph">
+                <div v-for="c in clusterBars" :key="c.id" class="cluster-row">
+                  <div class="cluster-meta">
+                    <span class="cluster-name">Cluster {{ c.id }}</span>
+                    <span class="cluster-label">{{ c.label }}</span>
+                  </div>
+                  <div class="cluster-track">
+                    <div class="cluster-fill" :style="{ width: c.width, background: c.color }"></div>
+                  </div>
+                  <div class="cluster-val">{{ c.avgEmotion }}</div>
+                </div>
+              </div>
+            </div>
             <div class="report-narrative">{{ report.narrative }}</div>
             <div class="report-section" v-if="report.patterns?.dominant_narratives?.length">
               <h4>Dominant Narratives</h4>
@@ -307,6 +354,111 @@ const agentCounts = computed(() => ({
   deep: agents.value.filter(a => a.tier === 'deep').length,
   shallow: agents.value.filter(a => a.tier === 'shallow').length,
 }))
+
+function clamp01(val, fallback = 0.5) {
+  const n = Number(val)
+  if (!Number.isFinite(n)) return fallback
+  return Math.min(1, Math.max(0, n))
+}
+
+function extractPercent(text) {
+  if (!text) return null
+  const match = String(text).match(/(\d{1,3}(?:\.\d+)?)\s*%/)
+  if (!match) return null
+  const n = Number(match[1])
+  if (!Number.isFinite(n)) return null
+  return clamp01(n / 100, null)
+}
+
+const predictionView = computed(() => {
+  const rep = report.value
+  if (!rep) return null
+  const raw = rep.prediction ?? rep.patterns?.prediction ?? null
+  if (!raw) return null
+
+  let outcome = ''
+  let counterOutcome = ''
+  let probability = null
+  let counterProbability = null
+  let confidence = null
+  let evidence = []
+
+  if (typeof raw === 'string') {
+    outcome = raw.trim()
+    probability = extractPercent(outcome)
+  } else if (typeof raw === 'object') {
+    outcome = String(raw.outcome || raw.prediction || '').trim()
+    counterOutcome = String(raw.counterfactual || raw.alternative || '').trim()
+    probability = raw.probability ?? extractPercent(outcome)
+    counterProbability = raw.counter_probability ?? raw.counterProbability
+    confidence = raw.confidence
+    evidence = raw.evidence || raw.signals || []
+  }
+
+  if (probability === null || probability === undefined) probability = 0.5
+  probability = clamp01(probability, 0.5)
+
+  if (counterProbability === null || counterProbability === undefined) {
+    counterProbability = 1 - probability
+  }
+  counterProbability = clamp01(counterProbability, 1 - probability)
+
+  const total = probability + counterProbability
+  if (total > 0) {
+    probability = probability / total
+    counterProbability = counterProbability / total
+  }
+
+  confidence = clamp01(confidence, 0.5)
+
+  if (!outcome) outcome = 'Outcome uncertain'
+  if (!counterOutcome) counterOutcome = 'Outcome does not occur'
+
+  if (typeof evidence === 'string') evidence = [evidence]
+  if (!Array.isArray(evidence)) evidence = []
+  evidence = evidence.map(e => String(e).trim()).filter(Boolean).slice(0, 5)
+
+  return {
+    outcome,
+    counterOutcome,
+    probability,
+    counterProbability,
+    confidence,
+    percent: Math.round(probability * 100),
+    counterPercent: Math.round(counterProbability * 100),
+    confidencePercent: Math.round(confidence * 100),
+    evidence,
+  }
+})
+
+const predictionRingStyle = computed(() => {
+  if (!predictionView.value) return {}
+  const pct = predictionView.value.percent
+  return {
+    background: `conic-gradient(var(--accent, #00d4ff) 0 ${pct}%, rgba(255,255,255,0.08) ${pct}% 100%)`,
+  }
+})
+
+const clusterBars = computed(() => {
+  const summary = report.value?.cluster_summary || {}
+  const entries = Object.entries(summary)
+  if (!entries.length) return []
+  const maxSize = Math.max(...entries.map(([, v]) => v?.size || 0), 1)
+  return entries.map(([id, v]) => {
+    const avg = Number(v?.avg_emotion ?? 0)
+    const label = v?.label || (avg > 0.1 ? 'Positive' : avg < -0.1 ? 'Negative' : 'Neutral')
+    const color = label === 'Positive' ? '#00ff88' : label === 'Negative' ? '#ff4060' : '#00d4ff'
+    const size = v?.size || 0
+    return {
+      id,
+      label,
+      size,
+      avgEmotion: avg.toFixed(2),
+      width: `${Math.max(8, (size / maxSize) * 100)}%`,
+      color,
+    }
+  })
+})
 
 // ── Canvas Network ────────────────────────────────────────────────────────────
 function buildNetwork(agentList) {
@@ -687,6 +839,31 @@ function handleProceed(action) {
 .report-section h4 { color: var(--accent); margin-bottom: 10px; font-size: 13px; letter-spacing: 0.05em; }
 .report-section ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .report-section li { padding: 6px 10px; background: var(--bg-3); border-radius: var(--radius); font-size: 12px; }
+.prediction-card { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.pred-main { display: flex; flex-direction: column; gap: 6px; }
+.pred-pct { font-size: 28px; font-weight: 800; color: var(--accent, #00d4ff); }
+.pred-outcome { font-size: 13px; color: var(--text-bright); line-height: 1.5; }
+.pred-conf { font-size: 11px; color: var(--text-dim); letter-spacing: 0.04em; text-transform: uppercase; }
+.pred-viz { display: grid; grid-template-columns: 70px 1fr; gap: 16px; align-items: center; }
+.pred-ring { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--border); box-shadow: 0 0 18px rgba(0,212,255,0.08) inset; }
+.pred-bars { display: flex; flex-direction: column; gap: 8px; }
+.pred-bar-row { display: grid; grid-template-columns: 1fr 140px 50px; gap: 8px; align-items: center; font-size: 11px; color: var(--text-dim); }
+.pred-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pred-bar-track { height: 6px; background: var(--bg-4); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.pred-bar-fill { height: 100%; }
+.pred-bar-fill.yes { background: linear-gradient(90deg, rgba(0,212,255,0.9), rgba(0,255,136,0.9)); }
+.pred-bar-fill.no { background: linear-gradient(90deg, rgba(255,64,96,0.85), rgba(255,170,0,0.85)); }
+.pred-val { text-align: right; color: var(--text-bright); font-weight: 700; }
+.pred-evidence { display: flex; flex-direction: column; gap: 6px; }
+.pred-evidence-item { font-size: 11px; color: var(--text-dim); padding: 6px 10px; background: var(--bg-4); border-radius: var(--radius); border: 1px solid var(--border); }
+.cluster-graph { display: flex; flex-direction: column; gap: 10px; }
+.cluster-row { display: grid; grid-template-columns: 140px 1fr 50px; gap: 10px; align-items: center; font-size: 11px; }
+.cluster-meta { display: flex; flex-direction: column; gap: 2px; }
+.cluster-name { color: var(--text-bright); font-weight: 700; }
+.cluster-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; font-size: 9px; }
+.cluster-track { height: 8px; background: var(--bg-4); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.cluster-fill { height: 100%; border-radius: 6px; }
+.cluster-val { text-align: right; color: var(--text-bright); font-weight: 700; }
 .influencer-list { display: flex; flex-direction: column; gap: 4px; }
 .influencer { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg-3); border-radius: var(--radius); font-size: 12px; }
 .inf-rank { color: var(--accent); font-weight: 700; min-width: 28px; }

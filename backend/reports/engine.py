@@ -8,15 +8,23 @@ from llm import router
 
 
 PATTERN_SYSTEM = """You are a social dynamics analyst. Analyze simulation data and identify clear patterns.
-Return ONLY valid JSON — no markdown, no preamble:
+Return ONLY valid JSON - no markdown, no preamble:
 {
   "dominant_narratives": ["clear description of narrative 1", "clear description of narrative 2"],
   "opinion_clusters": [{"cluster_id": 0, "stance": "clear stance description", "size": 10, "avg_emotion": 0.2}],
   "information_cascades": ["how idea X spread through the network"],
   "tipping_points": [{"tick": 15, "description": "what changed at this moment"}],
   "echo_chambers": ["description of identified echo chamber"],
-  "prediction": "Based on the simulation dynamics, the most likely outcome is: [specific prediction]"
-}"""
+  "prediction": {
+    "outcome": "specific predicted outcome",
+    "probability": 0.0,
+    "counterfactual": "most likely alternative outcome",
+    "counter_probability": 0.0,
+    "confidence": 0.0,
+    "evidence": ["short evidence point 1", "short evidence point 2"]
+  }
+}
+Probabilities must be between 0.0 and 1.0 and should sum to ~1.0."""
 
 CAUSAL_SYSTEM = """You are a causal attribution analyst.
 Return ONLY valid JSON:
@@ -31,10 +39,10 @@ Return ONLY valid JSON:
 NARRATIVE_SYSTEM = """You are a senior intelligence analyst writing a briefing for a non-technical audience.
 
 CRITICAL RULES:
-1. Write in PLAIN ENGLISH — no jargon, no academic language
-2. Be SPECIFIC — name actual agents, actual stances, actual outcomes
-3. Make a CLEAR PREDICTION at the end — commit to one outcome
-4. Structure: Summary → What happened → Why → Prediction → Key agents
+1. Write in PLAIN ENGLISH - no jargon, no academic language
+2. Be SPECIFIC - name actual agents, actual stances, actual outcomes
+3. Make a CLEAR PREDICTION at the end - commit to one outcome and include a percentage
+4. Structure: Summary -> What happened -> Why -> Prediction -> Key agents
 5. Keep it under 500 words
 6. Every paragraph must be immediately understandable by anyone
 
@@ -80,6 +88,7 @@ async def generate_report(simulation_id: str) -> dict:
             temperature=0.3,
         )
         patterns = _safe_parse_json(pattern_response)
+        prediction = _normalize_prediction(patterns.get("prediction"))
 
         # Pass 2: Causal Attribution
         causal_response = await router.complete(
@@ -167,6 +176,7 @@ Write a clear, plain-English report. Make a specific prediction. Name real agent
             "patterns": patterns,
             "causation": causation,
             "narrative": narrative,
+            "prediction": prediction,
             "influence_ranking": influence_ranking,
             "cluster_summary": cluster_summary,
             "stats": {
@@ -236,3 +246,107 @@ def _safe_parse_json(text: str) -> dict:
             except Exception:
                 pass
     return {}
+
+
+def _clamp01(value: float) -> float:
+    try:
+        v = float(value)
+    except Exception:
+        return 0.0
+    if v < 0:
+        return 0.0
+    if v > 1:
+        return 1.0
+    return v
+
+
+def _extract_percentage(text: str) -> float | None:
+    import re
+    if not text:
+        return None
+    match = re.search(r"(\d{1,3}(?:\.\d+)?)\s*%", text)
+    if not match:
+        return None
+    try:
+        val = float(match.group(1)) / 100.0
+    except Exception:
+        return None
+    return _clamp01(val)
+
+
+def _normalize_prediction(raw) -> dict:
+    """Normalize prediction payload into a consistent schema for UI."""
+    if raw is None:
+        return {
+            "outcome": "Outcome uncertain",
+            "probability": 0.5,
+            "counterfactual": "Outcome does not occur",
+            "counter_probability": 0.5,
+            "confidence": 0.2,
+            "evidence": [],
+        }
+
+    if isinstance(raw, str):
+        prob = _extract_percentage(raw)
+        if prob is None:
+            prob = 0.5
+        return {
+            "outcome": raw.strip(),
+            "probability": prob,
+            "counterfactual": "Outcome does not occur",
+            "counter_probability": _clamp01(1 - prob),
+            "confidence": 0.4,
+            "evidence": [],
+        }
+
+    if not isinstance(raw, dict):
+        return {
+            "outcome": "Outcome uncertain",
+            "probability": 0.5,
+            "counterfactual": "Outcome does not occur",
+            "counter_probability": 0.5,
+            "confidence": 0.2,
+            "evidence": [],
+        }
+
+    outcome = (raw.get("outcome") or raw.get("prediction") or "").strip()
+    counter = (raw.get("counterfactual") or raw.get("alternative") or "").strip()
+
+    prob = raw.get("probability")
+    if prob is None:
+        prob = _extract_percentage(outcome or "")
+    prob = _clamp01(prob if prob is not None else 0.5)
+
+    counter_prob = raw.get("counter_probability")
+    if counter_prob is None:
+        counter_prob = _clamp01(1 - prob)
+    else:
+        counter_prob = _clamp01(counter_prob)
+
+    total = prob + counter_prob
+    if total > 0:
+        prob = prob / total
+        counter_prob = counter_prob / total
+
+    confidence = _clamp01(raw.get("confidence") if raw.get("confidence") is not None else 0.5)
+
+    evidence = raw.get("evidence") or raw.get("signals") or []
+    if isinstance(evidence, str):
+        evidence = [evidence]
+    if not isinstance(evidence, list):
+        evidence = []
+    evidence = [str(e).strip() for e in evidence if str(e).strip()][:5]
+
+    if not outcome:
+        outcome = "Outcome uncertain"
+    if not counter:
+        counter = "Outcome does not occur"
+
+    return {
+        "outcome": outcome,
+        "probability": round(prob, 4),
+        "counterfactual": counter,
+        "counter_probability": round(counter_prob, 4),
+        "confidence": round(confidence, 4),
+        "evidence": evidence,
+    }
