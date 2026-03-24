@@ -2,7 +2,11 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 
-const API = '/api'
+const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL?.trim()
+const RAW_WS_BASE = import.meta.env.VITE_WS_BASE_URL?.trim()
+const VERCEL_FALLBACK_API = 'https://oceaagent-production.up.railway.app/api'
+const API = (RAW_API_BASE || (location.hostname.endsWith('vercel.app') ? VERCEL_FALLBACK_API : '/api')).replace(/\/+$/, '')
+const WS_BASE = (RAW_WS_BASE || (API.startsWith('http') ? API.replace(/^http/, 'ws').replace(/\/api$/, '') : '')).replace(/\/+$/, '')
 
 export const useSimulationStore = defineStore('simulation', () => {
   const simulations = ref([])
@@ -94,8 +98,12 @@ export const useSimulationStore = defineStore('simulation', () => {
 
   function connectWebSocket(simId, onMessage) {
     if (ws) ws.close()
-    const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
-    ws = new WebSocket(`${protocol}://${location.host}/ws/${simId}`)
+    if (WS_BASE) {
+      ws = new WebSocket(`${WS_BASE}/ws/${simId}`)
+    } else {
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
+      ws = new WebSocket(`${protocol}://${location.host}/ws/${simId}`)
+    }
 
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data)

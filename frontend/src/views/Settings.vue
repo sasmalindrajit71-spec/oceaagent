@@ -226,7 +226,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-const API = '/api'
+const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL?.trim()
+const VERCEL_FALLBACK_API = 'https://oceaagent-production.up.railway.app/api'
+const API = (RAW_API_BASE || (location.hostname.endsWith('vercel.app') ? VERCEL_FALLBACK_API : '/api')).replace(/\/+$/, '')
 
 // ── NVIDIA state ──────────────────────────────────────────────────────────────
 const nvidiaKey      = ref('')
