@@ -10,7 +10,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from analytics import get_stats
 from database import SessionLocal, Simulation, Agent, Interaction
 
-router = APIRouter(prefix="/api/admin")
+router = APIRouter()
 security = HTTPBasic()
 
 ADMIN_USER = os.getenv("ADMIN_USERNAME", "admin")
