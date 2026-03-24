@@ -5,7 +5,8 @@ import axios from 'axios'
 const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL?.trim()
 const RAW_WS_BASE = import.meta.env.VITE_WS_BASE_URL?.trim()
 const VERCEL_FALLBACK_API = 'https://oceaagent-production.up.railway.app/api'
-const API = (RAW_API_BASE || (location.hostname.endsWith('vercel.app') ? VERCEL_FALLBACK_API : '/api')).replace(/\/+$/, '')
+// Use absolute URL for non-dev environments to avoid relying on Vercel rewrites
+const API = (RAW_API_BASE || (!location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1') ? VERCEL_FALLBACK_API : '/api')).replace(/\/+$/, '')
 const WS_BASE = (RAW_WS_BASE || (API.startsWith('http') ? API.replace(/^http/, 'ws').replace(/\/api$/, '') : '')).replace(/\/+$/, '')
 
 export const useSimulationStore = defineStore('simulation', () => {
