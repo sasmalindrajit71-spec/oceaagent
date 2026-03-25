@@ -1,7 +1,17 @@
 # ocean.config.yaml
-# OCEAN Configuration — Groq only setup
+# OCEAN Configuration — Groq + NVIDIA setup
 
 providers:
+  nvidia:
+    api_key: ""
+    enabled: false
+    models:
+      deep_agent: "meta/llama-3.3-70b-instruct"
+      shallow_agent: "meta/llama-3.1-8b-instruct"
+      evaluator: "nvidia/llama-3.3-nemotron-super-49b-v1"
+      graph_rag: "meta/llama-3.3-70b-instruct"
+      report_engine: "nvidia/nemotron-3-super-120b-a12b"
+
   openrouter:
     api_key: ""
     enabled: false
@@ -17,7 +27,7 @@ providers:
     enabled: true
     models:
       deep_agent: "llama-3.3-70b-versatile"
-      shallow_agent: "llama-3.3-70b-versatile"
+      shallow_agent: "llama-3.1-8b-instant"
       evaluator: "llama-3.3-70b-versatile"
       graph_rag: "llama-3.3-70b-versatile"
       report_engine: "llama-3.3-70b-versatile"
@@ -60,17 +70,6 @@ simulation:
   max_shallow_agents: 5000
   default_ticks: 30
   tick_delay_ms: 500
-
-
-nvidia:
-    api_key: ""
-    enabled: false
-    models:
-      deep_agent: "meta/llama-3.3-70b-instruct"
-      shallow_agent: "meta/llama-3.1-8b-instruct"
-      evaluator: "nvidia/llama-3.3-nemotron-super-49b-v1"
-      graph_rag: "meta/llama-3.3-70b-instruct"
-      report_engine: "nvidia/nemotron-3-super-120b-a12b"
 
 memory:
   decay_rate: 0.05
