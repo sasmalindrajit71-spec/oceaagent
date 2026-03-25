@@ -1,13 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { API_BASE } from '../api.js'
 
-const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL?.trim()
-const RAW_WS_BASE = import.meta.env.VITE_WS_BASE_URL?.trim()
-const VERCEL_FALLBACK_API = 'https://oceaagent-production.up.railway.app/api'
-// Use absolute URL for non-dev environments to avoid relying on Vercel rewrites
-const API = (RAW_API_BASE || (!location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1') ? VERCEL_FALLBACK_API : '/api')).replace(/\/+$/, '')
-const WS_BASE = (RAW_WS_BASE || (API.startsWith('http') ? API.replace(/^http/, 'ws').replace(/\/api$/, '') : '')).replace(/\/+$/, '')
+const API = API_BASE
+const WS_BASE = API.replace(/^http/, 'ws').replace(/\/api$/, '')
 
 export const useSimulationStore = defineStore('simulation', () => {
   const simulations = ref([])

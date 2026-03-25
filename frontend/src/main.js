@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import './assets/global.css'
+import { API_BASE } from './api.js'
 
 import Dashboard        from './views/Dashboard.vue'
 import NewSimulation    from './views/NewSimulation.vue'
@@ -25,7 +26,7 @@ const router = createRouter({
 
 // Track page views on every route change
 router.afterEach((to) => {
-  fetch('/api/analytics/pageview', {
+  fetch(`${API_BASE}/analytics/pageview`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: to.fullPath }),

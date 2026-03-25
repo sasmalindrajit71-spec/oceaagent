@@ -176,8 +176,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import { API_BASE } from '../api.js'
 
-const API = '/api/admin'
+const API = `${API_BASE}/admin`
 
 // Auth
 const authed    = ref(false)

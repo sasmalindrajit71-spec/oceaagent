@@ -20,6 +20,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
+import { API_BASE } from '../api.js'
 
 const props = defineProps({ simId: String })
 
@@ -39,13 +40,13 @@ onUnmounted(() => {
 
 async function loadGraph() {
   try {
-    const { data } = await axios.get(`/api/simulations/${props.simId}`)
+    const { data } = await axios.get(`${API_BASE}/simulations/${props.simId}`)
     const kg = data.knowledge_graph
     if (!kg) return
 
     // Social graph is stored as JSON string inside knowledge_graph
     // We need to fetch agents to build node data
-    const { data: agents } = await axios.get(`/api/simulations/${props.simId}/agents`)
+    const { data: agents } = await axios.get(`${API_BASE}/simulations/${props.simId}/agents`)
     if (!agents.length) return
 
     // Build a simplified graph from agents (cluster-based)
