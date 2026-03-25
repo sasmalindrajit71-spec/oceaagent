@@ -63,8 +63,48 @@ def load_config() -> OceanConfig:
     if path.exists():
         with open(path) as f:
             data = yaml.safe_load(f) or {}
-        return OceanConfig(**data)
-    return OceanConfig()
+        cfg = OceanConfig(**data)
+    else:
+        cfg = OceanConfig()
+
+    # Override with environment variables
+    if os.getenv("NVIDIA_API_KEY"):
+        cfg.providers.nvidia.api_key = os.getenv("NVIDIA_API_KEY")
+        cfg.providers.nvidia.enabled = True
+        if not cfg.providers.nvidia.models.deep_agent:
+            cfg.providers.nvidia.models = ModelSet(
+                deep_agent="meta/llama-3.1-70b-instruct",
+                shallow_agent="meta/llama-3.1-8b-instruct",
+                evaluator="meta/llama-3.1-70b-instruct",
+                graph_rag="meta/llama-3.1-70b-instruct",
+                report_engine="meta/llama-3.1-70b-instruct",
+            )
+
+    if os.getenv("GROQ_API_KEY"):
+        cfg.providers.groq.api_key = os.getenv("GROQ_API_KEY")
+        cfg.providers.groq.enabled = True
+        if not cfg.providers.groq.models.deep_agent:
+            cfg.providers.groq.models = ModelSet(
+                deep_agent="llama-3.3-70b-versatile",
+                shallow_agent="llama-3.1-8b-instant",
+                evaluator="llama-3.3-70b-versatile",
+                graph_rag="llama-3.3-70b-versatile",
+                report_engine="llama-3.3-70b-versatile",
+            )
+
+    if os.getenv("OPENROUTER_API_KEY"):
+        cfg.providers.openrouter.api_key = os.getenv("OPENROUTER_API_KEY")
+        cfg.providers.openrouter.enabled = True
+        if not cfg.providers.openrouter.models.deep_agent:
+            cfg.providers.openrouter.models = ModelSet(
+                deep_agent="deepseek/deepseek-chat-v3-0324:free",
+                shallow_agent="deepseek/deepseek-chat-v3-0324:free",
+                evaluator="deepseek/deepseek-chat-v3-0324:free",
+                graph_rag="deepseek/deepseek-chat-v3-0324:free",
+                report_engine="deepseek/deepseek-chat-v3-0324:free",
+            )
+
+    return cfg
 
 
 def save_config(config: OceanConfig):
